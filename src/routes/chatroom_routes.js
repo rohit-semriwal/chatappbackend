@@ -4,13 +4,21 @@ const MessageModel = require('./../models/message_model');
 
 router.post("/createroom", async function(req, res) {
     const requestData = req.body;
+
+    // Check if already exists
+    const foundChatroom = await ChatroomModel.findOne({ participants: { $all: requestData.participants } });
+    if(foundChatroom) {
+        res.json({ success: true, data: foundChatroom });
+        return;
+    }
+
     const newChatroom = new ChatroomModel(requestData);
     await newChatroom.save(function(err) {
         if(err) {
             res.json({ success: false, message: err });
         }
         else {
-            res.json({ success: true, message: "Chatroom created!" });
+            res.json({ success: true, data: newChatroom });
         }
     });
 });

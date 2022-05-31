@@ -24,13 +24,18 @@ const socketio = require('socket.io');
 const io = new socketio.Server(server);
 
 io.on('connection', function(socket) {
-    socket.join("xyz");
+    
+    socket.on("join-room", function(roomid) {
+        console.log("Someone joined " + roomid);
+        socket.join(roomid); 
+    });
 
     socket.on("new-message", function(data) {
-        console.log("a user said : " + data);
+        const jsonData = JSON.parse(data);
 
-        // EMIT
-        socket.broadcast.to("xyz").emit("new-message", data);
+        console.log("New message in: " + jsonData.chatroomid);
+
+        socket.broadcast.to(jsonData.chatroomid).emit("new-message", data);
     });
 
     socket.on('disconnect', function() {
