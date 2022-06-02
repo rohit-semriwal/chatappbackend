@@ -6,19 +6,20 @@ router.post("/createroom", async function(req, res) {
     const requestData = req.body;
 
     // Check if already exists
-    const foundChatroom = await ChatroomModel.findOne({ participants: { $all: requestData.participants } });
+    const foundChatroom = await ChatroomModel.findOne({ participants: { $all: requestData.participants } }).populate("participants lastmessage");
     if(foundChatroom) {
         res.json({ success: true, data: foundChatroom });
         return;
     }
 
     const newChatroom = new ChatroomModel(requestData);
-    await newChatroom.save(function(err) {
+    await newChatroom.save(async function(err) {
         if(err) {
             res.json({ success: false, message: err });
         }
         else {
-            res.json({ success: true, data: newChatroom });
+            const populatedChatroom = await ChatroomModel.findOne({ chatroomid: newChatroom.chatroomid }).populate("participants lastmessage");
+            res.json({ success: true, data: populatedChatroom });
         }
     });
 });
@@ -68,7 +69,13 @@ router.post("/deletemessage", async function(req, res) {
 router.post("/fetchmessages", async function(req, res) {
     const requestData = req.body;
     const foundMessages = await MessageModel.find({ chatroomid: requestData.chatroomid });
-    res.json(foundMessages);
+    res.json({ success: true, data: foundMessages });
+});
+
+router.get("/:userid", async function(req, res) {
+    const userid = req.params.userid;
+    const foundChatrooms = await ChatroomModel.find({ participants: userid }).populate("participants lastmessage");
+    res.json({ success: true, data: foundChatrooms });
 });
 
 module.exports = router;

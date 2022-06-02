@@ -38,7 +38,12 @@ router.post("/create", async function(req, res) {
 
 router.post("/search", async function(req, res) {
     const requestData = req.body;
-    const foundUsers = await UserModel.find({ email: requestData.email });
+    const foundUsers = await UserModel.find(
+        { email: {
+            $eq: requestData.email,
+            $ne: requestData.myemail
+        } },
+    );
     res.json(foundUsers);
 });
 
