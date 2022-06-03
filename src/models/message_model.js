@@ -4,7 +4,7 @@ const messageSchema = new Schema({
     messageid: { type: String, required: true, unique: true },
     chatroomid: { type: String, required: true },
     msg: { type: String, required: true },
-    sender: { type: Schema.Types.ObjectId, ref: "User" },
+    sender: { type: String, default: "" },
     createdon: { type: Date, default: Date.now }
 });
 

@@ -2,6 +2,8 @@ const router = require('express').Router();
 const ChatroomModel = require('./../models/chatroom_model');
 const MessageModel = require('./../models/message_model');
 
+// GET, POST, PUT, DELETE
+
 router.post("/createroom", async function(req, res) {
     const requestData = req.body;
 
@@ -24,6 +26,12 @@ router.post("/createroom", async function(req, res) {
     });
 });
 
+router.put("/updateroom", async function(req, res) {
+    const requestData = req.body;
+    const result = await ChatroomModel.updateOne({ chatroomid: requestData.chatroomid }, requestData);
+    res.json({ success: true, data: result });
+});
+
 router.post("/deleteroom", async function(req, res) {
     const requestData = req.body;
     const deleteResult = await ChatroomModel.deleteOne(requestData);
@@ -41,11 +49,12 @@ router.post("/sendmessage", async function(req, res) {
     const foundChatroom = await ChatroomModel.findOne({ chatroomid: messageData.chatroomid });
     if(foundChatroom) {
         const newMessage = new MessageModel(messageData);
-        await newMessage.save(function(err) {
+        await newMessage.save(async function(err) {
             if(err) {
                 res.json({ success: false, message: err });
             }
             else {
+                const result = await ChatroomModel.findOneAndUpdate({ chatroomid: messageData.chatroomid }, { lastmessage: newMessage._id });
                 res.json({ success: true, message: "Message Sent!" });
             }
         });
